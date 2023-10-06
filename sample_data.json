@@ -1,0 +1,20 @@
+[
+    {
+        "name": "The Songs of Adelaide & Abullah",
+        "category": "Poetry",
+        "main_category": "Publishing",
+        "goal": 1000.0
+    },
+    {
+        "name": "Greeting From Earth: ZGAC Arts Capsule For ET",
+        "category": "Narrative Film",
+        "main_category": "Film & Video",
+        "goal": 30000.0
+    },
+    {
+        "category": "Narrative Film",
+        "goal": 45000.0,
+        "main_category": "Film & Video",
+        "name": "Where is Hank?"
+    }
+]
