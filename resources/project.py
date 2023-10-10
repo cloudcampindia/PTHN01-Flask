@@ -2,7 +2,7 @@ from flask import request
 from flask_restful import Resource
 from http import HTTPStatus
 
-from models.project import projects_list, Project
+from models.project import Project
 
 class ProjectListResource(Resource):
 
@@ -10,10 +10,11 @@ class ProjectListResource(Resource):
         """
         Returns the list of projects
         """
+        projects_list = Project.query.all()
         data = []
         for project in projects_list:
-            data.append(project.data)
-        return data, HTTPStatus.OK
+            data.append(project.data())
+        return {'data': data}, HTTPStatus.OK
 
 
     def post(self):
@@ -25,7 +26,7 @@ class ProjectListResource(Resource):
                           category=data["category"], 
                           main_category=data["main_category"], 
                           goal=data["goal"])
-        projects_list.append(project)
+        project.save()
         return {}, HTTPStatus.CREATED
 
 class ProjectResource(Resource):
@@ -35,11 +36,10 @@ class ProjectResource(Resource):
         """
         Fetch a project by its ID
         """
-        for project in projects_list:
-            if project.project_id == project_id:
-                return project.data
-        else:
-            return {'message': f"Project with ID: {project_id} is not found"}
+        project = Project.get_by_project_id(project_id=project_id)
+        if project is None:
+            return {'message': f"Project with ID: {project_id} is not found"}, HTTPStatus.NOT_FOUND
+        return {'data': project.data()}, HTTPStatus.OK
 
 
     def put(self, project_id):
@@ -47,23 +47,26 @@ class ProjectResource(Resource):
         Update a project by its ID
         """
         data = request.get_json()
-        for project in projects_list:
-            if project.project_id == project_id:
-                project.name = data["name"]
-                project.category = data["category"]
-                project.goal = data["goal"]
-                project.main_category = data["main_category"]
-                return project.data
-        else:
-            return {'message': f"Project with ID: {project_id} is not found"}
+        project = Project.get_by_project_id(project_id=project_id)
+        if project is None:
+            return {'message': f"Project with ID: {project_id} is not found"}, HTTPStatus.NOT_FOUND
+        
+        project.name = data["name"]
+        project.category = data["category"]
+        project.goal = data["goal"]
+        project.main_category = data["main_category"]
+
+        project.save()
+
+        return project.data(), HTTPStatus.OK
 
     def delete(self, project_id):
         """
         Delete a project by its ID
         """
-        for project in projects_list:
-            if project.project_id == project_id:
-                projects_list.remove(project)
-                return ''
-        else:
-            return {'message': f"Project with ID: {project_id} is not found"}
+        project = Project.get_by_project_id(project_id=project_id)
+        if project is None:
+            return {'message': f"Project with ID: {project_id} is not found"}, HTTPStatus.NOT_FOUND
+        
+        project.delete()
+        return {}, HTTPStatus.NO_CONTENT

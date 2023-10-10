@@ -1,34 +1,15 @@
-projects_list = []
+from extensions import db
 
-def get_project_id():
-    """
-    Return the Project ID information based on the list of projects
-    present in our in-memory database
-    """
-    if projects_list:
-        return projects_list[-1].data['project_id'] + 1
-    return 1
+# Project Table ORM model
+class Project(db.Model):
+    __tablename__ = "project"
 
-"""
-"name": "The Songs of Adelaide & Abullah",
-"category": "Poetry",
-"main_category": "Publishing",
-"goal": 1000.0
-"""
+    project_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(300), nullable=False)
+    category = db.Column(db.String(100), nullable=False)
+    main_category = db.Column(db.String(100), nullable=False)
+    goal = db.Column(db.Float, nullable=False)
 
-class Project:
-    """
-    Template to be used when creating a project in
-    our database
-    """
-    def __init__(self, name, category, main_category, goal):
-        self.project_id = get_project_id()
-        self.name = name
-        self.category = category
-        self.main_category = main_category
-        self.goal = goal
-    
-    @property
     def data(self):
         return {
             'project_id': self.project_id,
@@ -37,3 +18,15 @@ class Project:
             'main_category': self.main_category,
             'goal': self.goal
         }
+
+    @classmethod
+    def get_by_project_id(cls, project_id):
+        return cls.query.filter_by(project_id=project_id).first()
+    
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
